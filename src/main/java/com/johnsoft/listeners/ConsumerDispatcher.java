@@ -20,7 +20,7 @@ package com.johnsoft.listeners;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public class ConsumerDispatcher<E> extends AbstractDispatcher {
+public class ConsumerDispatcher<E> extends AbstractDispatcher<E> {
     public ConsumerDispatcher() {
         this(new Builder<E>());
     }
@@ -35,7 +35,7 @@ public class ConsumerDispatcher<E> extends AbstractDispatcher {
     }
 
     @Override
-    protected void onListenersUpdate(int code, Listener listener) {
+    protected void onListenersUpdate(int code, Listener<E> listener) {
         if (code == CODE_LISTENER_ADDED) {
             try { // try cast to report error at addListener
                 Consumer<E> consumer = (Consumer<E>)listener;
@@ -51,10 +51,10 @@ public class ConsumerDispatcher<E> extends AbstractDispatcher {
     }
 
     @Override
-    protected void doNotifyListeners(Listener[] listeners, Object event) {
+    protected void doNotifyListeners(Listener<E>[] listeners, E event) {
         for (int i = 0; i < listeners.length; ++i) {
             try {
-                if (((Consumer<E>) listeners[i]).on((E) event)) {
+                if (((Consumer<E>) listeners[i]).on(event)) {
                     break;
                 }
             } catch (Throwable e) {
@@ -63,7 +63,7 @@ public class ConsumerDispatcher<E> extends AbstractDispatcher {
         }
     }
 
-    public static class Builder<E> extends AbstractDispatcher.Builder {
+    public static class Builder<E> extends AbstractDispatcher.Builder<E> {
         public Builder() {
             super();
         }

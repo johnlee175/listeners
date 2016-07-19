@@ -16,6 +16,7 @@
  */
 package com.johnsoft.listeners;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -24,18 +25,18 @@ import java.util.LinkedList;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public abstract class AbstractDispatcher implements ListenerDispatcher {
+public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
     protected static final int CODE_LISTENER_ADDED = 1;
     protected static final int CODE_LISTENERS_CLEARED = 0;
     protected static final int CODE_LISTENER_REMOVED = -1;
 
     private final byte[] listenersLock = new byte[0];
-    private final Collection<Listener> listeners;
+    private final Collection<Listener<E>> listeners;
     private final boolean distinct;
     private final boolean visitSameWithNotify;
     private final ListenerExecutor callThread;
 
-    protected AbstractDispatcher(Builder builder) {
+    protected AbstractDispatcher(Builder<E> builder) {
         distinct = builder.distinct;
         visitSameWithNotify = builder.visitSameWithNotify;
         callThread = builder.callThread;
@@ -46,14 +47,14 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
         }
     }
 
-    public abstract Builder newBuilder();
+    public abstract Builder<E> newBuilder();
 
     public final ListenerExecutor getCallThread() {
         return callThread;
     }
 
     @Override
-    public final boolean addListener(Listener listener) {
+    public final boolean addListener(Listener<E> listener) {
         if (listener != null) {
             synchronized(listenersLock) {
                 final boolean result = listeners.add(listener);
@@ -65,7 +66,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
     }
 
     @Override
-    public final boolean removeListener(Listener listener) {
+    public final boolean removeListener(Listener<E> listener) {
         if (listener != null) {
             synchronized(listenersLock) {
                 final boolean result = listeners.remove(listener);
@@ -77,7 +78,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
     }
 
     @Override
-    public final boolean containsListener(Listener listener) {
+    public final boolean containsListener(Listener<E> listener) {
         if (listener == null) {
             return false;
         }
@@ -101,7 +102,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
     }
 
     @Override
-    public final void notifyListeners(final Object event) {
+    public final void notifyListeners(final E event) {
         if (callThread == null) {
             doNotifyListeners(cloneListeners(), event);
         } else {
@@ -115,7 +116,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
     }
 
     @Override
-    public final void visitListeners(final ListenerVisitor visitor) {
+    public final void visitListeners(final ListenerVisitor<E> visitor) {
         if (visitor != null) {
             if (callThread == null || !visitSameWithNotify) {
                 doVisitListeners(visitor);
@@ -130,11 +131,11 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
         }
     }
 
-    protected abstract void doNotifyListeners(Listener[] listeners, Object event);
+    protected abstract void doNotifyListeners(Listener<E>[] listeners, E event);
 
-    protected abstract void onListenersUpdate(int code, Listener listener);
+    protected abstract void onListenersUpdate(int code, Listener<E> listener);
 
-    private final void deliverListenersUpdate(int code, Listener listener) {
+    private final void deliverListenersUpdate(int code, Listener<E> listener) {
         try {
             onListenersUpdate(code, listener);
         } catch (Throwable e) {
@@ -142,16 +143,16 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
         }
     }
 
-    private final void doVisitListeners(ListenerVisitor visitor) {
-        final Listener[] listenerArray = cloneListeners();
+    private final void doVisitListeners(ListenerVisitor<E> visitor) {
+        final Listener<E>[] listenerArray = cloneListeners();
         for (int i = 0; i < listenerArray.length; ++i) {
             visitor.visit(listenerArray[i]);
         }
     }
 
-    private final Listener[] cloneListeners() {
+    private final Listener<E>[] cloneListeners() {
         // TODO should cache the listener array with version control on concurrent environment?
-        Listener[] listenerArray = new Listener[0];
+        Listener<E>[] listenerArray = (Listener<E>[])Array.newInstance(Listener.class, 0);
         synchronized(listenersLock) {
             listenerArray = listeners.toArray(listenerArray);
         }
@@ -172,7 +173,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
         }
     }
 
-    public static abstract class Builder {
+    public static abstract class Builder<E> {
         private boolean distinct;
         private boolean visitSameWithNotify;
         private ListenerExecutor callThread;
@@ -183,7 +184,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
             callThread = null;
         }
 
-        protected Builder(AbstractDispatcher dispatcher) {
+        protected Builder(AbstractDispatcher<E> dispatcher) {
             distinct = dispatcher.distinct;
             visitSameWithNotify = dispatcher.visitSameWithNotify;
             callThread = dispatcher.callThread;
@@ -193,7 +194,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
             return distinct;
         }
 
-        public Builder setDistinct(boolean distinct) {
+        public Builder<E> setDistinct(boolean distinct) {
             this.distinct = distinct;
             return this;
         }
@@ -202,7 +203,7 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
             return callThread;
         }
 
-        public Builder setCallThread(ListenerExecutor callThread) {
+        public Builder<E> setCallThread(ListenerExecutor callThread) {
             this.callThread = callThread;
             return this;
         }
@@ -211,11 +212,11 @@ public abstract class AbstractDispatcher implements ListenerDispatcher {
             return visitSameWithNotify;
         }
 
-        public Builder setVisitSameWithNotify(boolean visitSameWithNotify) {
+        public Builder<E> setVisitSameWithNotify(boolean visitSameWithNotify) {
             this.visitSameWithNotify = visitSameWithNotify;
             return this;
         }
 
-        public abstract AbstractDispatcher build();
+        public abstract AbstractDispatcher<E> build();
     }
 }

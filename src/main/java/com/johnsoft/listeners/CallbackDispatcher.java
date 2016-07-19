@@ -26,7 +26,7 @@ import java.util.WeakHashMap;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public class CallbackDispatcher<E> extends AbstractDispatcher {
+public class CallbackDispatcher<E> extends AbstractDispatcher<E> {
     private static <E> Map<Callback<E>, ListenerExecutor> generateCallbackListenerExecutorMap() {
         return Collections.synchronizedMap(new HashMap<Callback<E>, ListenerExecutor>());
     }
@@ -69,7 +69,7 @@ public class CallbackDispatcher<E> extends AbstractDispatcher {
     }
 
     @Override
-    protected void onListenersUpdate(int code, Listener listener) {
+    protected void onListenersUpdate(int code, Listener<E> listener) {
         switch (code) {
             case CODE_LISTENER_ADDED:
                 try {
@@ -147,10 +147,10 @@ public class CallbackDispatcher<E> extends AbstractDispatcher {
     }
 
     @Override
-    protected void doNotifyListeners(Listener[] listeners, Object event) {
+    protected void doNotifyListeners(Listener<E>[] listeners, E event) {
         for (int i = 0; i < listeners.length; ++i) {
             try {
-                notifyCallback((Callback<E>) listeners[i], (E) event);
+                notifyCallback((Callback<E>) listeners[i], event);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -203,7 +203,7 @@ public class CallbackDispatcher<E> extends AbstractDispatcher {
         }
     }
 
-    public static class Builder<E> extends AbstractDispatcher.Builder {
+    public static class Builder<E> extends AbstractDispatcher.Builder<E> {
         private final Map<Callback<E>, ListenerExecutor> customExecutorMap;
         private Class<? extends ListenerExecutor> perExecutorClass;
         private ListenerExecutor defaultExecutor;

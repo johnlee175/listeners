@@ -20,5 +20,5 @@ package com.johnsoft.listeners;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public interface Listener {
+public interface Listener<E> {
 }

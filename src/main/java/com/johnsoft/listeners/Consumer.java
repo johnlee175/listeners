@@ -20,6 +20,6 @@ package com.johnsoft.listeners;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public interface Consumer<E> extends Listener {
+public interface Consumer<E> extends Listener<E> {
     boolean on(E event);
 }

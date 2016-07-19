@@ -20,6 +20,6 @@ package com.johnsoft.listeners;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public interface ListenerVisitor {
-    void visit(Listener listener);
+public interface ListenerVisitor<E> {
+    void visit(Listener<E> listener);
 }

@@ -20,11 +20,11 @@ package com.johnsoft.listeners;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public interface ListenerDispatcher {
-    boolean addListener(Listener listener);
-    boolean removeListener(Listener listener);
-    boolean containsListener(Listener listener);
+public interface ListenerDispatcher<E> {
+    boolean addListener(Listener<E> listener);
+    boolean removeListener(Listener<E> listener);
+    boolean containsListener(Listener<E> listener);
     boolean clearListeners();
-    void notifyListeners(Object event);
-    void visitListeners(ListenerVisitor visitor);
+    void notifyListeners(E event);
+    void visitListeners(ListenerVisitor<E> visitor);
 }
