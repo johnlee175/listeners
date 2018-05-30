@@ -17,6 +17,8 @@
 package com.johnsoft.listeners;
 
 /**
+ * A independent listener, no return value, as standard callback.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */

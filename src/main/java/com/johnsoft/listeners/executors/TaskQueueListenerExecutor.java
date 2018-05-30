@@ -49,18 +49,18 @@ public final class TaskQueueListenerExecutor extends AbstractListenerExecutor {
     }
 
     @Override
-    public ListenerExecutor.CancelControler doExecute(Runnable runnable) {
+    public CancelController doExecute(Runnable runnable) {
         if (thread.post(runnable)) {
-            return new TaskThreadCancelControler(thread, runnable);
+            return new TaskThreadCancelController(thread, runnable);
         }
         return null;
     }
 
-    public static final class TaskThreadCancelControler implements ListenerExecutor.CancelControler {
+    public static final class TaskThreadCancelController implements CancelController {
         private final TaskThread taskThread;
         private final Runnable runnable;
 
-        public TaskThreadCancelControler(TaskThread taskThread, Runnable runnable) {
+        public TaskThreadCancelController(TaskThread taskThread, Runnable runnable) {
             this.taskThread = taskThread;
             this.runnable = runnable;
         }

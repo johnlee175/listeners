@@ -17,16 +17,30 @@
 package com.johnsoft.listeners;
 
 /**
+ * A utilities and factory of Builder which implements ListenerDispatcher.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
+ *
+ * @see ListenerDispatcher
  */
 public final class Dispatchers {
     private Dispatchers() {}
 
+    /**
+     * @param clazz the generic type of ConsumerDispatcher.Builder, which as the event class.
+     * @return a newly ConsumerDispatcher.Builder object.
+     * @see com.johnsoft.listeners.ConsumerDispatcher.Builder
+     */
     public static <E> ConsumerDispatcher.Builder<E> orderedDependentDispatcher(Class<E> clazz) {
         return new ConsumerDispatcher.Builder<>();
     }
 
+    /**
+     * @param clazz the generic type of CallbackDispatcher.Builder, which as the event class.
+     * @return a newly CallbackDispatcher.Builder object.
+     * @see com.johnsoft.listeners.CallbackDispatcher.Builder
+     */
     public static <E> CallbackDispatcher.Builder<E> disorderedIndependentDispatcher(Class<E> clazz) {
         return new CallbackDispatcher.Builder<>();
     }

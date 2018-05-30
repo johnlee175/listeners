@@ -82,7 +82,7 @@ public abstract class AbstractListenerExecutor implements ListenerExecutor {
     }
 
     @Override
-    public final CancelControler execute(Runnable runnable) {
+    public final CancelController execute(Runnable runnable) {
         if (state != STATE_ALIVE) {
             throw new IllegalStateException("Not alive!");
         }
@@ -93,7 +93,7 @@ public abstract class AbstractListenerExecutor implements ListenerExecutor {
         }
     }
 
-    protected abstract CancelControler doExecute(Runnable runnable);
+    protected abstract CancelController doExecute(Runnable runnable);
 
     @Override
     public final Mode getMode() {

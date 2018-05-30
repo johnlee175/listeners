@@ -17,14 +17,22 @@
 package com.johnsoft.listeners;
 
 /**
+ * A listener manager and event dispatcher.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
 public interface ListenerDispatcher<E> {
+    /** add a listener to manager, if add success, return true */
     boolean addListener(Listener<E> listener);
+    /** remove a listener from manager, if remove success, return true */
     boolean removeListener(Listener<E> listener);
+    /** if listener is managed, return true */
     boolean containsListener(Listener<E> listener);
+    /** remove all listeners from manager */
     boolean clearListeners();
+    /** dispatch event to all listeners */
     void notifyListeners(E event);
+    /** visit all listeners copies */
     void visitListeners(ListenerVisitor<E> visitor);
 }

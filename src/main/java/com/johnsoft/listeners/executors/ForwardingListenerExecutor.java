@@ -55,7 +55,7 @@ public class ForwardingListenerExecutor implements ListenerExecutor {
     }
 
     @Override
-    public CancelControler execute(Runnable runnable) {
+    public CancelController execute(Runnable runnable) {
         return listenerExecutor.execute(runnable);
     }
 

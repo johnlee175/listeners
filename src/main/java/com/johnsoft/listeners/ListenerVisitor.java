@@ -17,8 +17,12 @@
 package com.johnsoft.listeners;
 
 /**
+ * A visitor of listeners
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
+ *
+ * @see ListenerDispatcher#visitListeners(ListenerVisitor)
  */
 public interface ListenerVisitor<E> {
     void visit(Listener<E> listener);

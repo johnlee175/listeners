@@ -60,15 +60,15 @@ public final class ThreadPoolListenerExecutor extends AbstractListenerExecutor {
     }
 
     @Override
-    public CancelControler doExecute(Runnable runnable) {
+    public CancelController doExecute(Runnable runnable) {
         final Future<?> future = executorService.submit(runnable);
-        return new FutureCancelControler(future);
+        return new FutureCancelController(future);
     }
 
-    public static final class FutureCancelControler implements CancelControler {
+    public static final class FutureCancelController implements CancelController {
         private final Future<?> future;
 
-        public FutureCancelControler(Future<?> future) {
+        public FutureCancelController(Future<?> future) {
             this.future = future;
         }
 

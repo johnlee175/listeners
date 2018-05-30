@@ -21,16 +21,25 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
+import javax.annotation.concurrent.GuardedBy;
+
 /**
+ * {@code ListenerDispatcher} base class. It provide status control and builder pattern.
+ * The custom {@code ListenerDispatcher} should refer to it.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
 public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
+    /** indicate a listener added, use for sub-class handle listeners update */
     protected static final int CODE_LISTENER_ADDED = 1;
+    /** indicate all listener remove, use for sub-class handle listeners update */
     protected static final int CODE_LISTENERS_CLEARED = 0;
+    /** indicate remove a listener added, use for sub-class handle listeners update */
     protected static final int CODE_LISTENER_REMOVED = -1;
 
     private final byte[] listenersLock = new byte[0];
+    @GuardedBy("listenersLock")
     private final Collection<Listener<E>> listeners;
     private final boolean distinct;
     private final boolean visitSameWithNotify;
@@ -53,6 +62,9 @@ public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
         return callThread;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean addListener(Listener<E> listener) {
         if (listener != null) {
@@ -65,6 +77,9 @@ public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean removeListener(Listener<E> listener) {
         if (listener != null) {
@@ -77,6 +92,9 @@ public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean containsListener(Listener<E> listener) {
         if (listener == null) {
@@ -87,6 +105,9 @@ public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final boolean clearListeners() {
         try {
@@ -101,6 +122,10 @@ public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
         }
     }
 
+    /**
+     *
+     * If set call thread on Builder build, will schedule on that thread, else schedule on current thread.
+     */
     @Override
     public final void notifyListeners(final E event) {
         if (callThread == null) {
@@ -115,6 +140,9 @@ public abstract class AbstractDispatcher<E> implements ListenerDispatcher<E> {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public final void visitListeners(final ListenerVisitor<E> visitor) {
         if (visitor != null) {
