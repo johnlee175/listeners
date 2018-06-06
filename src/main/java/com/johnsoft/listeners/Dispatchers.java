@@ -16,6 +16,10 @@
  */
 package com.johnsoft.listeners;
 
+import com.johnsoft.listeners.dispatcher.CallbackDispatcher;
+import com.johnsoft.listeners.dispatcher.ChainDispatcher;
+import com.johnsoft.listeners.dispatcher.ConsumerDispatcher;
+
 /**
  * A utilities and factory of Builder which implements ListenerDispatcher.
  *
@@ -30,18 +34,27 @@ public final class Dispatchers {
     /**
      * @param clazz the generic type of ConsumerDispatcher.Builder, which as the event class.
      * @return a newly ConsumerDispatcher.Builder object.
-     * @see com.johnsoft.listeners.ConsumerDispatcher.Builder
+     * @see ConsumerDispatcher.Builder
      */
-    public static <E> ConsumerDispatcher.Builder<E> orderedDependentDispatcher(Class<E> clazz) {
+    public static <E> ConsumerDispatcher.Builder<E> consumerDispatcher(Class<E> clazz) {
         return new ConsumerDispatcher.Builder<>();
+    }
+
+    /**
+     * @param clazz the generic type of ChainDispatcher.Builder, which as the event class.
+     * @return a newly ChainDispatcher.Builder object.
+     * @see ChainDispatcher.Builder
+     */
+    public static <E> ChainDispatcher.Builder<E> chainDispatcher(Class<E> clazz) {
+        return new ChainDispatcher.Builder<>();
     }
 
     /**
      * @param clazz the generic type of CallbackDispatcher.Builder, which as the event class.
      * @return a newly CallbackDispatcher.Builder object.
-     * @see com.johnsoft.listeners.CallbackDispatcher.Builder
+     * @see CallbackDispatcher.Builder
      */
-    public static <E> CallbackDispatcher.Builder<E> disorderedIndependentDispatcher(Class<E> clazz) {
+    public static <E> CallbackDispatcher.Builder<E> callbackDispatcher(Class<E> clazz) {
         return new CallbackDispatcher.Builder<>();
     }
 }

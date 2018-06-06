@@ -17,8 +17,8 @@
 package com.johnsoft.listeners.test;
 
 import com.johnsoft.listeners.Callback;
-import com.johnsoft.listeners.CallbackDispatcher;
 import com.johnsoft.listeners.Dispatchers;
+import com.johnsoft.listeners.dispatcher.CallbackDispatcher;
 
 /**
  * @author John Kenrinus Lee
@@ -27,8 +27,8 @@ import com.johnsoft.listeners.Dispatchers;
 public class MyResource {
     private CallbackDispatcher<MyEvent> dispatcher;
     MyResource() {
-        dispatcher = Dispatchers.disorderedIndependentDispatcher(MyEvent.class)
-        .setDistinct(true).setPerExecutorClass(MyListenerExecutor.class).build();
+        dispatcher = Dispatchers.callbackDispatcher(MyEvent.class)
+        .setPerExecutorClass(MyListenerExecutor.class).build();
     }
 
     public void addListener(Callback<MyEvent> callback) {

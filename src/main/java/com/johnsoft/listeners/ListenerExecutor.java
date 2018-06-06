@@ -17,7 +17,7 @@
 package com.johnsoft.listeners;
 
 /**
- * An abstract of executor which schedule {@code Runnable} task in special thread.
+ * An abstract of executor which schedule a task into a special thread.
  * The listener's methods will be called with ListenerExecutor.
  * We don't reuse the executor mechanism built in JDK for more precise, but if you want,
  * {@code ThreadPoolListenerExecutor} will be helpful.
@@ -31,77 +31,42 @@ package com.johnsoft.listeners;
  * @see com.johnsoft.listeners.executors.TaskQueueListenerExecutor
  * @see com.johnsoft.listeners.executors.ThreadPoolListenerExecutor
  */
-public interface ListenerExecutor {
-    /**
-     * @return True if the ListenerExecutor object is not initialized.
-     *         This method should return true after initialize() be called correctly.
-     */
-    boolean isNotInitialized();
-
+public interface ListenerExecutor extends Callback<Object> {
     /** initialize the ListenerExecutor object. */
     void initialize();
-
-    /**
-     * @return True if the ListenerExecutor object is initialized and not destroyed and available.
-     *         Make sure isNotInitialized() return false and isDestroyed() return false here.
-     */
-    boolean isAlive();
 
     /** destroy the ListenerExecutor object. */
     void destroy();
 
-    /**
-     * @return True if the ListenerExecutor object is destroyed.
-     *         This method should return true after destroy() be called correctly.
-     */
-    boolean isDestroyed();
+    /** @return the status of {@code ListenerExecutor} */
+    int getState();
+
+    /** @return the mode of {@code ListenerExecutor} */
+    int getMode();
 
     /**
-     * Indicate that if exists a task waiting to be executed, whether or not the task will be
-     * covered when the new task arrives. Use for dispatcher in the future,
-     * but not yet used at any {@code ListenerExecutor} implementation class built-ins.
+     * @param mode the mode of {@code ListenerExecutor}
+     * @return whether the mode setting is successful or not
      */
-    boolean isCoverUnexectuedMode();
+    boolean setMode(int mode);
 
     /**
-     * the mode of {@code ListenerExecutor}
+     * a cancel controller, which can cancel a task scheduled.
      */
-    enum Mode {
-        /**
-         * Indicate the ListenerExecutor object serves a single listener.
-         * @see Listener
-         */
-        FOR_SINGLE_LISTENER,
-        /**
-         * Indicate the ListenerExecutor object serves a single dispatcher, multi listeners.
-         * @see ListenerDispatcher
-         */
-        FOR_SINGLE_DISPATCHER,
-        /**
-         * Indicate the ListenerExecutor object serves multi dispatchers, multi listeners.
-         * Not recommended.
-         */
-        FOR_MULTI_SHARED
-    }
-
-    /**
-     * @return the mode of {@code ListenerExecutor}
-     * @see Mode
-     */
-    Mode getMode();
-
-    /**
-     * a cancel controller, which can cancel a task schedule.
-     */
-    interface CancelController {
+    interface Cancelable {
         void cancel();
     }
 
     /**
-     * Schedule to execute a task in a special thread.
-     * @param runnable a task.
-     * @return a handle for schedule, like future, use it can cancel this schedule.
-     * @see CancelController
+     * a executable action task
      */
-    CancelController execute(Runnable runnable);
+    interface Executable extends Cancelable, Runnable {
+    }
+
+    /**
+     * Schedule to execute a task in a special thread.
+     * @see Cancelable
+     * @see Executable
+     */
+    Cancelable execute(Executable executable);
 }

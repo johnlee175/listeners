@@ -19,8 +19,9 @@ package com.johnsoft.listeners.executors;
 import com.johnsoft.listeners.ListenerExecutor;
 
 /**
+ * A proxy or decorator of {@code ListenerExecutor}
  * @author John Kenrinus Lee
- * @version 2016-07-18
+ * @version 2016-07-17
  */
 public class ForwardingListenerExecutor implements ListenerExecutor {
     private final ListenerExecutor listenerExecutor;
@@ -30,18 +31,8 @@ public class ForwardingListenerExecutor implements ListenerExecutor {
     }
 
     @Override
-    public boolean isNotInitialized() {
-        return listenerExecutor.isNotInitialized();
-    }
-
-    @Override
     public void initialize() {
         listenerExecutor.initialize();
-    }
-
-    @Override
-    public boolean isAlive() {
-        return listenerExecutor.isAlive();
     }
 
     @Override
@@ -50,22 +41,27 @@ public class ForwardingListenerExecutor implements ListenerExecutor {
     }
 
     @Override
-    public boolean isDestroyed() {
-        return listenerExecutor.isDestroyed();
+    public int getState() {
+        return listenerExecutor.getState();
     }
 
     @Override
-    public CancelController execute(Runnable runnable) {
-        return listenerExecutor.execute(runnable);
-    }
-
-    @Override
-    public Mode getMode() {
+    public int getMode() {
         return listenerExecutor.getMode();
     }
 
     @Override
-    public boolean isCoverUnexectuedMode() {
-        return listenerExecutor.isCoverUnexectuedMode();
+    public boolean setMode(int mode) {
+        return listenerExecutor.setMode(mode);
+    }
+
+    @Override
+    public Cancelable execute(Executable executable) {
+        return listenerExecutor.execute(executable);
+    }
+
+    @Override
+    public void on(Object event) {
+        listenerExecutor.on(event);
     }
 }

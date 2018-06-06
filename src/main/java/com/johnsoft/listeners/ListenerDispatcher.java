@@ -22,7 +22,7 @@ package com.johnsoft.listeners;
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public interface ListenerDispatcher<E> {
+public interface ListenerDispatcher<E> extends Callback<Object> {
     /** add a listener to manager, if add success, return true */
     boolean addListener(Listener<E> listener);
     /** remove a listener from manager, if remove success, return true */

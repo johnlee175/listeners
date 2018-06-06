@@ -14,19 +14,14 @@
  * See the license for the specific language governing permissions and
  * limitations under the license.
  */
-package com.johnsoft.listeners.test;
-
-import java.util.concurrent.LinkedBlockingQueue;
-
-import com.johnsoft.listeners.executors.ForwardingListenerExecutor;
-import com.johnsoft.listeners.executors.TaskQueueListenerExecutor;
+package com.johnsoft.listeners;
 
 /**
+ * A chained listener, return enhanced event for next listener in chain.
+ *
  * @author John Kenrinus Lee
- * @version 2016-07-18
+ * @version 2016-07-15
  */
-public class MyListenerExecutor extends ForwardingListenerExecutor {
-    public MyListenerExecutor() {
-        super(new TaskQueueListenerExecutor(null, new LinkedBlockingQueue<Executable>()));
-    }
+public interface Chain<E> extends Listener<E> {
+    E on(E event);
 }

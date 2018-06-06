@@ -16,47 +16,57 @@
  */
 package com.johnsoft.listeners.executors;
 
+import com.johnsoft.listeners.DefaultFoundation;
 import com.johnsoft.listeners.ListenerExecutor;
+import com.johnsoft.listeners.ListenerFoundation;
 
 /**
+ * {@code ListenerExecutor} base class. It provide status control and common operator.
+ * The custom {@code ListenerExecutor} should refer to it.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-17
  */
 public abstract class AbstractListenerExecutor implements ListenerExecutor {
-    private static final int STATE_NOT_INITIALIZED = 0;
-    private static final int STATE_ALIVE = 1;
-    private static final int STATE_DESTROYED = -1;
+    public static final int STATE_NOT_INITIALIZED = 0;
+    public static final int STATE_ALIVE = 1;
+    public static final int STATE_DESTROYED = -1;
 
-    private final Mode mode;
-    private final boolean isCoverUnexectuedMode;
-    protected volatile int state;
-
-    public AbstractListenerExecutor(Mode mode, boolean isCoverUnexectuedMode) {
-        this.mode = mode;
-        this.isCoverUnexectuedMode = isCoverUnexectuedMode;
-        this.state = STATE_NOT_INITIALIZED;
+    public static final boolean isNotInitialized(int state) {
+        return state == STATE_NOT_INITIALIZED;
     }
 
-    @Override
-    public final boolean isNotInitialized() {
-        return state == STATE_NOT_INITIALIZED;
+    public static final boolean isAlive(int state) {
+        return state == STATE_ALIVE;
+    }
+
+    public static final boolean isDestroyed(int state) {
+        return state == STATE_DESTROYED;
+    }
+
+    protected final ListenerFoundation foundation;
+
+    private volatile int state;
+    private int mode; // not used yet
+
+    public AbstractListenerExecutor(ListenerFoundation foundation) {
+        if (foundation == null) {
+            this.foundation = new DefaultFoundation();
+        } else {
+            this.foundation = foundation;
+        }
+        this.state = STATE_NOT_INITIALIZED;
     }
 
     @Override
     public final void initialize() {
         if (state != STATE_NOT_INITIALIZED) {
-            throw new IllegalStateException("Can't re-initialize!");
+            foundation.throwException(new IllegalStateException("Can't re-initialize!"));
+            return;
         }
         if (doInitialize()) {
             state = STATE_ALIVE;
         }
-    }
-
-    protected abstract boolean doInitialize();
-
-    @Override
-    public final boolean isAlive() {
-        return state == STATE_ALIVE;
     }
 
     @Override
@@ -65,7 +75,8 @@ public abstract class AbstractListenerExecutor implements ListenerExecutor {
             return;
         }
         if (state == STATE_NOT_INITIALIZED) {
-            throw new IllegalStateException("Not initialize!");
+            foundation.throwException(new IllegalStateException("Executor is not initialized!"));
+            return;
         }
         try {
             doDestroy();
@@ -74,34 +85,44 @@ public abstract class AbstractListenerExecutor implements ListenerExecutor {
         }
     }
 
+    @Override
+    public final Cancelable execute(Executable executable) {
+        if (state != STATE_ALIVE) {
+            foundation.throwException(new IllegalStateException("Executor is not alive!"));
+        }
+        return doExecute(executable);
+    }
+
+    protected abstract boolean doInitialize();
+
     protected abstract void doDestroy();
 
+    protected abstract Cancelable doExecute(Executable executable);
+
+    /** not used yet */
     @Override
-    public final boolean isDestroyed() {
-        return state == STATE_DESTROYED;
+    public boolean setMode(int mode) {
+        this.mode = mode;
+        return true;
     }
 
+    /** not used yet */
     @Override
-    public final CancelController execute(Runnable runnable) {
-        if (state != STATE_ALIVE) {
-            throw new IllegalStateException("Not alive!");
-        }
-        try {
-            return doExecute(runnable);
-        } catch (Throwable e) {
-            return null;
-        }
-    }
-
-    protected abstract CancelController doExecute(Runnable runnable);
-
-    @Override
-    public final Mode getMode() {
+    public int getMode() {
         return mode;
     }
 
+    /**
+     * please use {@link #isNotInitialized(int)}, {@link #isAlive(int)}, {@link #isDestroyed(int)} instead
+     */
     @Override
-    public final boolean isCoverUnexectuedMode() {
-        return isCoverUnexectuedMode;
+    public final int getState() {
+        return state;
+    }
+
+    @Override
+    public void on(Object event) {
+        // TODO a executor can serve for one event, listener, dispatcher, or other target,
+        // TODO how destroy the executor while the target finalized
     }
 }
