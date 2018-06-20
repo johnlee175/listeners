@@ -17,9 +17,14 @@
 package com.johnsoft.listeners;
 
 /**
+ * A ordered listener, base on return value and {@code Consumer} container. <br/>
+ * When notify event to observers, if the container is a sequence, and a {@code Consumer} object in the sequence
+ * has return true(consume event), it means that may be the {@code Consumer} objects in the sequence
+ * but after that one, will not be called.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
  */
-public interface Consumer<E> extends Listener {
+public interface Consumer<E> extends Listener<E> {
     boolean on(E event);
 }

@@ -17,24 +17,56 @@
 package com.johnsoft.listeners;
 
 /**
+ * An abstract of executor which schedule a task into a special thread.
+ * The listener's methods will be called with ListenerExecutor.
+ * We don't reuse the executor mechanism built in JDK for more precise, but if you want,
+ * {@code ThreadPoolListenerExecutor} will be helpful.
+ * You can also custom a executor base on {@code AbstractListenerExecutor}.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
+ *
+ * @see com.johnsoft.listeners.executors.AbstractListenerExecutor
+ * @see com.johnsoft.listeners.executors.ForwardingListenerExecutor
+ * @see com.johnsoft.listeners.executors.TaskQueueListenerExecutor
+ * @see com.johnsoft.listeners.executors.ThreadPoolListenerExecutor
  */
-public interface ListenerExecutor {
-    boolean isNotInitialized();
+public interface ListenerExecutor extends Callback<Object> {
+    /** initialize the ListenerExecutor object. */
     void initialize();
-    boolean isAlive();
+
+    /** destroy the ListenerExecutor object. */
     void destroy();
-    boolean isDestroyed();
-    CancelControler execute(Runnable runnable);
-    Mode getMode();
-    boolean isCoverUnexectuedMode();
 
-    enum Mode {
-       FOR_SINGLE_LISTENER, FOR_SINGLE_DISPATCHER, FOR_MULTI_SHARED
-    }
+    /** @return the status of {@code ListenerExecutor} */
+    int getState();
 
-    interface CancelControler {
+    /** @return the mode of {@code ListenerExecutor} */
+    int getMode();
+
+    /**
+     * @param mode the mode of {@code ListenerExecutor}
+     * @return whether the mode setting is successful or not
+     */
+    boolean setMode(int mode);
+
+    /**
+     * a cancel controller, which can cancel a task scheduled.
+     */
+    interface Cancelable {
         void cancel();
     }
+
+    /**
+     * a executable action task
+     */
+    interface Executable extends Cancelable, Runnable {
+    }
+
+    /**
+     * Schedule to execute a task in a special thread.
+     * @see Cancelable
+     * @see Executable
+     */
+    Cancelable execute(Executable executable);
 }

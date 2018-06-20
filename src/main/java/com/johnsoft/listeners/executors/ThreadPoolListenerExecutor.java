@@ -16,21 +16,30 @@
  */
 package com.johnsoft.listeners.executors;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import com.johnsoft.listeners.ListenerFoundation;
 
 /**
+ * Thread pool executor
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-17
  */
 public final class ThreadPoolListenerExecutor extends AbstractListenerExecutor {
     private final ExecutorService executorService;
 
-    public ThreadPoolListenerExecutor(ExecutorService executorService, Mode mode, boolean isCoverUnexectuedMode) {
-        super(mode, isCoverUnexectuedMode);
-        this.executorService = executorService;
+    public ThreadPoolListenerExecutor(ListenerFoundation foundation, ExecutorService executorService) {
+        super(foundation);
+        if (executorService == null) {
+            this.executorService = Executors.newCachedThreadPool();
+        } else {
+            this.executorService = executorService;
+        }
     }
 
     @Override
@@ -60,26 +69,50 @@ public final class ThreadPoolListenerExecutor extends AbstractListenerExecutor {
     }
 
     @Override
-    public CancelControler doExecute(Runnable runnable) {
-        final Future<?> future = executorService.submit(runnable);
-        return new FutureCancelControler(future);
+    public Cancelable doExecute(Executable executable) {
+        final FutureCancelController controller = new FutureCancelController(foundation, executable);
+        final Future<?> future = executorService.submit(controller);
+        controller.setFuture(future);
+        return controller;
     }
 
-    public static final class FutureCancelControler implements CancelControler {
-        private final Future<?> future;
+    private static final class FutureCancelController implements Executable {
+        private final ListenerFoundation foundation;
+        private final Executable executable;
+        private volatile Future<?> future;
 
-        public FutureCancelControler(Future<?> future) {
+        FutureCancelController(ListenerFoundation foundation,
+                                      Executable executable) {
+            this.foundation = foundation;
+            this.executable = executable;
+        }
+
+        void setFuture(Future<?> future) {
             this.future = future;
         }
 
         @Override
         public void cancel() {
             try {
+                if (executable != null) {
+                    executable.cancel();
+                }
                 if (future != null && !future.isCancelled() && !future.isDone()) {
                     future.cancel(true);
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                foundation.catchThrowable(e);
+            }
+        }
+
+        @Override
+        public void run() {
+            if (executable != null) {
+                try {
+                    executable.run();
+                } catch (Throwable e) {
+                    foundation.catchThrowable(new ExecutionException(e));
+                }
             }
         }
     }

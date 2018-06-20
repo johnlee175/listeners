@@ -17,19 +17,26 @@
 package com.johnsoft.listeners.executors;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import com.johnsoft.listeners.ListenerExecutor;
+import com.johnsoft.listeners.ListenerFoundation;
 
 /**
+ * Loop async thread executor
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-17
  */
 public final class TaskQueueListenerExecutor extends AbstractListenerExecutor {
     private final TaskThread thread;
 
-    public TaskQueueListenerExecutor(BlockingQueue<Runnable> queue, ListenerExecutor.Mode mode, boolean isCoverUnexectuedMode) {
-        super(mode, isCoverUnexectuedMode);
-        this.thread = new TaskThread(queue);
+    public TaskQueueListenerExecutor(ListenerFoundation foundation, BlockingQueue<Executable> queue) {
+        super(foundation);
+        if (queue == null) {
+            queue = new LinkedBlockingQueue<>();
+        }
+        this.thread = new TaskThread(foundation, queue);
     }
 
     @Override
@@ -44,69 +51,75 @@ public final class TaskQueueListenerExecutor extends AbstractListenerExecutor {
         try {
             thread.join(1000L);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            foundation.catchThrowable(e);
         }
     }
 
     @Override
-    public ListenerExecutor.CancelControler doExecute(Runnable runnable) {
-        if (thread.post(runnable)) {
-            return new TaskThreadCancelControler(thread, runnable);
+    public Cancelable doExecute(Executable executable) {
+        if (thread.post(executable)) {
+            return new TaskThreadCancelController(foundation, thread, executable);
         }
         return null;
     }
 
-    public static final class TaskThreadCancelControler implements ListenerExecutor.CancelControler {
+    private static final class TaskThreadCancelController implements Cancelable {
+        private final ListenerFoundation foundation;
         private final TaskThread taskThread;
-        private final Runnable runnable;
+        private final Executable executable;
 
-        public TaskThreadCancelControler(TaskThread taskThread, Runnable runnable) {
+        TaskThreadCancelController(ListenerFoundation foundation,
+                                          TaskThread taskThread, Executable executable) {
+            this.foundation = foundation;
             this.taskThread = taskThread;
-            this.runnable = runnable;
+            this.executable = executable;
         }
 
         @Override
         public void cancel() {
             try {
-                if (taskThread != null && runnable != null) {
-                    taskThread.cancel(runnable);
+                if (taskThread != null && executable != null) {
+                    executable.cancel();
+                    taskThread.cancel(executable);
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                foundation.catchThrowable(e);
             }
         }
     }
 
     public static final class TaskThread extends Thread {
-        private final BlockingQueue<Runnable> queue;
+        private final ListenerFoundation foundation;
+        private final BlockingQueue<Executable> queue;
 
-        public TaskThread(BlockingQueue<Runnable> queue) {
+        public TaskThread(ListenerFoundation foundation, BlockingQueue<Executable> queue) {
+            this.foundation = foundation;
             this.queue = queue;
         }
 
-        public boolean post(Runnable runnable) {
-            return queue.offer(runnable);
+        public boolean post(Executable executable) {
+            return queue.offer(executable);
         }
 
-        public boolean cancel(Runnable runnable) {
-            return queue.remove(runnable);
+        public boolean cancel(Executable executable) {
+            return queue.remove(executable);
         }
 
         @Override
         public void run() {
             try {
                 while (!isInterrupted()) {
-                    final Runnable task = queue.take();
+                    final Executable task = queue.take();
                     if (task != null) {
                         try {
                             task.run();
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            foundation.catchThrowable(new ExecutionException(e));
                         }
                     }
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                foundation.catchThrowable(e);
             }
         }
     }

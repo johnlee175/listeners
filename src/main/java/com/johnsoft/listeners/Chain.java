@@ -17,13 +17,11 @@
 package com.johnsoft.listeners;
 
 /**
- * A visitor of listeners
+ * A chained listener, return enhanced event for next listener in chain.
  *
  * @author John Kenrinus Lee
  * @version 2016-07-15
- *
- * @see ListenerDispatcher#visitListeners(ListenerVisitor)
  */
-public interface ListenerVisitor<E> {
-    void visit(Listener<E> listener);
+public interface Chain<E> extends Listener<E> {
+    E on(E event);
 }

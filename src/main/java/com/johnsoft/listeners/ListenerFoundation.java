@@ -16,14 +16,18 @@
  */
 package com.johnsoft.listeners;
 
+import java.util.Map;
+
 /**
- * A visitor of listeners
+ * A foundation or environment implemented by user
+ * for logging, exception handle or other things.
  *
  * @author John Kenrinus Lee
  * @version 2016-07-15
- *
- * @see ListenerDispatcher#visitListeners(ListenerVisitor)
  */
-public interface ListenerVisitor<E> {
-    void visit(Listener<E> listener);
+public interface ListenerFoundation {
+    void log(String message);
+    void throwException(RuntimeException exception);
+    void catchThrowable(Throwable throwable);
+    Map<String, Object> getContext();
 }

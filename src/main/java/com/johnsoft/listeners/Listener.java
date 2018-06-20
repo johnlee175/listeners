@@ -17,8 +17,13 @@
 package com.johnsoft.listeners;
 
 /**
+ * The base interface for listener. The E is event type.
+ *
  * @author John Kenrinus Lee
  * @version 2016-07-15
+ *
+ * @see Callback
+ * @see Consumer
  */
-public interface Listener {
+public interface Listener<E> {
 }

@@ -18,7 +18,6 @@ package com.johnsoft.listeners.test;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.johnsoft.listeners.ListenerExecutor;
 import com.johnsoft.listeners.executors.ForwardingListenerExecutor;
 import com.johnsoft.listeners.executors.TaskQueueListenerExecutor;
 
@@ -28,7 +27,6 @@ import com.johnsoft.listeners.executors.TaskQueueListenerExecutor;
  */
 public class MyListenerExecutor extends ForwardingListenerExecutor {
     public MyListenerExecutor() {
-        super(new TaskQueueListenerExecutor(new LinkedBlockingQueue<Runnable>(),
-                ListenerExecutor.Mode.FOR_SINGLE_LISTENER, false));
+        super(new TaskQueueListenerExecutor(null, new LinkedBlockingQueue<Executable>()));
     }
 }
